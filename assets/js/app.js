@@ -332,6 +332,16 @@ function toggleDayCompletedState() {
     const key = `w${currentWeek}d${currentDay}`;
     if (progress[key]) {
         delete progress[key];
+        // Clean up and delete all active checkmarks for this day's sets from local storage
+        const data = workouts[currentDay];
+        const roundLimit = (data.type === "mobility") ? 3 : (data.type === "restoration" ? 1 : 4);
+        data.exercises.forEach((ex, idx) => {
+            for (let s = 0; s < roundLimit; s++) {
+                const activeKey = `w${currentWeek}d${currentDay}e${idx}s${s}`;
+                delete activeCheckboxes[activeKey];
+            }
+        });
+        localStorage.setItem('habitTracker_checks', JSON.stringify(activeCheckboxes));
     } else {
         progress[key] = true;
         const data = workouts[currentDay];
