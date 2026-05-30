@@ -32,6 +32,9 @@
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
+    <!-- Link to PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3a86f0">
 </head>
 <body class="text-brand-text min-h-screen pb-4">
 
@@ -95,7 +98,7 @@
                         <span id="compactCompleteText">Mark Done</span>
                     </button>
 
-                    <!-- Session Timer Control Panel -->
+                    <!-- Session Timer Control Panel (Enlarged Controls) -->
                     <div id="timerContainer" class="flex items-center gap-1 bg-black/40 px-1.5 py-0.5 rounded-lg border border-white/10">
                         <button id="timerToggle" onclick="toggleTimer()" class="text-brand-accent hover:text-brand-accentHover p-1 transition-all active:scale-90">
                             <svg id="playIcon" class="h-3.5 w-3.5 fill-current" viewBox="0 0 24 24">
@@ -175,5 +178,16 @@
 
     <!-- Script references - Versioned query string forces mobile cache update -->
     <script src="assets/js/app.js?v=1.12"></script>
+    
+    <!-- Register service worker for installable Android layout -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker running safely!'))
+                    .catch(err => console.log('PWA register skipped.'));
+            });
+        }
+    </script>
 </body>
 </html>
