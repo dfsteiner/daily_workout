@@ -590,6 +590,98 @@ function resetTimer() {
     renderWorkoutDetails();
 }
 
+function skipExercise(direction) {
+    const data = workouts[currentDay];
+    const totalSeconds = 20 * 60; // 1200
+    const elapsed = totalSeconds - timerSecondsLeft;
+
+    // Phase 1: Warmup phase skip handler
+    if (elapsed < 120) {
+        if (direction === 1) {
+            // Skip warmup straight to workout start
+            timerSecondsLeft = 1080;
+        }
+        updateTimerDisplay();
+        updateActiveHighlight(timerSecondsLeft);
+        return;
+    }
+
+    // Phase 3: Cooldown phase skip handler
+    if (elapsed >= 1080) {
+        if (direction === -1) {
+            // Go back to the end of the main workout (start of the last exercise block)
+            let blockTime = 60;
+            if (data.type === "standard") blockTime = data.workSec + data.restSec;
+            if (data.type === "restoration") blockTime = 240;
+            
+            let totalBlocks = (data.type === "restoration") ? 4 : 16;
+            let targetActiveSec = (totalBlocks - 1) * blockTime;
+            timerSecondsLeft = 1200 - (120 + targetActiveSec);
+        }
+        updateTimerDisplay();
+        updateActiveHighlight(timerSecondsLeft);
+        return;
+    }
+
+    // Phase 2: Main active workout block skip handler
+    const activeSeconds = elapsed - 120;
+    let blockTime = 60; 
+    if (data.type === "standard") {
+        blockTime = data.workSec + data.restSec;
+    } else if (data.type === "restoration") {
+        blockTime = 240;
+    }
+
+    // Handle self-paced AMRAP/Mobility modes (Skip adjusts general session timer by 1 min)
+    if (data.type === "amrap" || data.type === "mobility") {
+        let newActiveSeconds = activeSeconds + (direction * 60);
+        if (newActiveSeconds < 0) {
+            timerSecondsLeft = 1081; // jump back to warm-up phase
+        } else if (newActiveSeconds >= 960) {
+            timerSecondsLeft = 120;  // jump forward to cool-down phase
+        } else {
+            timerSecondsLeft = 1200 - (120 + newActiveSeconds);
+        }
+        updateTimerDisplay();
+        updateActiveHighlight(timerSecondsLeft);
+        return;
+    }
+
+    // Standard, EMOM, and Restoration sequential modes skip calculations
+    const currentBlock = Math.floor(activeSeconds / blockTime);
+    const blockElapsed = activeSeconds % blockTime;
+
+    let targetBlock = currentBlock;
+
+    if (direction === 1) {
+        targetBlock = currentBlock + 1;
+    } else if (direction === -1) {
+        if (blockElapsed > 3) {
+            // Restart current block if user is more than 3s in
+            targetBlock = currentBlock;
+        } else {
+            // Otherwise go back to previous block
+            targetBlock = currentBlock - 1;
+        }
+    }
+
+    const totalBlocks = (data.type === "restoration") ? 4 : 16;
+
+    if (targetBlock < 0) {
+        // Go back to warmup
+        timerSecondsLeft = 1081;
+    } else if (targetBlock >= totalBlocks) {
+        // Go to cooldown
+        timerSecondsLeft = 120;
+    } else {
+        let targetActiveSec = targetBlock * blockTime;
+        timerSecondsLeft = 1200 - (120 + targetActiveSec);
+    }
+
+    updateTimerDisplay();
+    updateActiveHighlight(timerSecondsLeft);
+}
+
 function updateTimerDisplay() {
     const m = Math.floor(timerSecondsLeft / 60);
     const s = timerSecondsLeft % 60;
