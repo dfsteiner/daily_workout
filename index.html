@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>20-Min Daily Fitness Tracker</title>
+    <!-- Tailwind CSS for rapid modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            bg: '#121214',
+                            card: '#1e1e24',
+                            accent: '#3a86f0',
+                            accentHover: '#2563eb',
+                            success: '#06d6a0',
+                            warning: '#ffd166',
+                            danger: '#ef476f',
+                            muted: '#a0aec0',
+                            text: '#f7fafc'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="text-brand-text min-h-screen pb-4">
+
+    <div class="max-w-md mx-auto px-3 pt-3">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-2.5">
+            <div>
+                <h1 class="text-lg font-black tracking-tight text-white flex items-center gap-1.5 leading-none">
+                    <span>20-MIN HABIT</span>
+                    <span class="text-[9px] bg-brand-accent text-white px-1.5 py-0.5 rounded-full font-bold font-sans">V1.10</span>
+                </h1>
+                <p class="text-[10px] text-brand-muted mt-0.5">Variable Daily Full-Body Strength</p>
+            </div>
+            
+            <!-- Compact Streak Indicator -->
+            <div class="bg-brand-card px-2 py-1 rounded-xl border border-white/5 flex items-center gap-1 shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-orange-500 fill-current" viewBox="0 0 24 24">
+                    <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 0 1-2.827 0l-4.244-4.243a8 8 0 1 1 11.314 0zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                </svg>
+                <p class="text-xs font-bold text-white leading-none" id="streakVal">0 Days</p>
+            </div>
+        </header>
+
+        <!-- Progress Overview Mini-Bar -->
+        <div class="bg-brand-card p-2 rounded-xl mb-2.5 border border-white/5 flex items-center justify-between gap-3">
+            <span class="text-[10px] font-bold text-brand-muted uppercase whitespace-nowrap">Progress</span>
+            <div class="w-full bg-black/40 h-2 rounded-full overflow-hidden">
+                <div id="progressBar" class="bg-gradient-to-r from-brand-accent to-brand-success h-full transition-all duration-500 rounded-full" style="width: 0%"></div>
+            </div>
+            <span id="progressPercent" class="text-[10px] font-bold text-brand-success whitespace-nowrap">0%</span>
+        </div>
+
+        <!-- Week Switcher Tab -->
+        <div class="flex p-1 bg-black/40 rounded-xl mb-2 border border-white/5">
+            <button onclick="changeWeek(1)" id="week-tab-1" class="flex-1 py-1.5 text-[11px] font-bold rounded-lg transition-all text-white bg-brand-accent shadow">Week 1</button>
+            <button onclick="changeWeek(2)" id="week-tab-2" class="flex-1 py-1.5 text-[11px] font-semibold rounded-lg transition-all text-brand-muted hover:text-white">Week 2</button>
+            <button onclick="changeWeek(3)" id="week-tab-3" class="flex-1 py-1.5 text-[11px] font-semibold rounded-lg transition-all text-brand-muted hover:text-white">Week 3</button>
+            <button onclick="changeWeek(4)" id="week-tab-4" class="flex-1 py-1.5 text-[11px] font-semibold rounded-lg transition-all text-brand-muted hover:text-white">Week 4</button>
+        </div>
+
+        <!-- Day Selectors -->
+        <div class="flex justify-between items-center gap-1 mb-2.5 overflow-x-auto no-scrollbar py-0.5" id="daySelectorContainer">
+            <!-- Populated via assets/js/app.js -->
+        </div>
+
+        <!-- Main Card Workout Board -->
+        <main class="bg-brand-card rounded-2xl p-3.5 border border-white/5 shadow-xl relative overflow-hidden">
+            <!-- Header with Integrated Title and Session Controls -->
+            <div class="flex items-center justify-between gap-3 mb-2.5 border-b border-white/5 pb-2">
+                <div class="min-w-0 flex-1">
+                    <span id="workoutTargetArea" class="text-[9px] font-bold text-brand-accent tracking-wider uppercase block truncate">Strength Split</span>
+                    <h2 id="workoutTitle" class="text-sm font-extrabold text-white tracking-tight leading-tight truncate">Upper Body & Core</h2>
+                </div>
+                
+                <div class="flex items-center gap-2 shrink-0">
+                    <!-- Toggle Day Completion Switch -->
+                    <button id="compactCompleteBtn" onclick="toggleDayCompletedState()" class="px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span id="compactCompleteText">Mark Done</span>
+                    </button>
+
+                    <!-- Session Timer Control Panel -->
+                    <div id="timerContainer" class="flex items-center gap-1 bg-black/40 px-1.5 py-0.5 rounded-lg border border-white/10">
+                        <button id="timerToggle" onclick="toggleTimer()" class="text-brand-accent hover:text-brand-accentHover p-1 transition-all active:scale-90">
+                            <svg id="playIcon" class="h-3 w-3 fill-current" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z" />
+                            </svg>
+                            <svg id="pauseIcon" class="h-3 w-3 fill-current hidden" viewBox="0 0 24 24">
+                                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                            </svg>
+                        </button>
+                        <button onclick="resetTimer()" class="text-brand-muted hover:text-white p-1 transition-all active:scale-90">
+                            <svg class="h-2.5 w-2.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                <path d="M3 3v5h5" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active HUD Board -->
+            <div id="hudOverlay" class="bg-black/60 border border-white/10 rounded-xl p-3 mb-2.5 flex items-center justify-between shadow-inner">
+                <div class="min-w-0">
+                    <div class="flex items-center gap-1.5">
+                        <span id="hudStateBadge" class="text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider bg-brand-accent text-white">READY</span>
+                        <span id="hudStateDetails" class="text-xs font-bold text-brand-muted truncate">Press play to begin</span>
+                    </div>
+                    <!-- Overall Session Clock -->
+                    <div class="flex items-baseline gap-1 mt-1">
+                        <span class="text-[9px] text-brand-muted font-bold uppercase tracking-wider">TOTAL TIMER</span>
+                        <span id="timerDisplay" class="text-2xl font-timer font-extrabold tracking-widest text-white">20:00</span>
+                    </div>
+                </div>
+                <!-- Giant Active Interval Clock -->
+                <div class="text-right border-l border-white/5 pl-3.5 shrink-0 flex flex-col justify-center">
+                    <span class="text-[8px] text-brand-muted font-bold uppercase tracking-wider block">INTERVAL</span>
+                    <span id="hudStateTime" class="text-3xl font-timer font-black text-brand-success leading-none mt-0.5">--</span>
+                </div>
+            </div>
+
+            <!-- Collapsible Warm-up Accordion -->
+            <div class="mb-2.5">
+                <div id="warmupHeader" onclick="toggleWarmupAccordion()" role="button" class="w-full flex items-center justify-between bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg text-[11px] text-brand-muted border border-white/5 transition-all cursor-pointer">
+                    <div class="flex items-center gap-1.5 font-bold uppercase tracking-wider">
+                        <svg id="warmupIcon" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-brand-muted flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        <span>Dynamic Warm-Up (2 Min)</span>
+                    </div>
+                    <svg id="warmupCaret" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
+                <div id="workoutWarmup" class="hidden mt-1 px-3 py-2 bg-brand-warning/5 rounded-lg text-xs border border-brand-warning/10 text-brand-text/90 leading-relaxed font-medium">
+                    Warmup instructions load here...
+                </div>
+            </div>
+
+            <!-- Focus List Area (Exercises) -->
+            <div class="space-y-1.5 mb-2.5" id="exerciseContainer">
+                <!-- Filled dynamically by assets/js/app.js -->
+            </div>
+
+            <!-- Structure & Timing Dashboard -->
+            <div class="bg-black/30 border border-white/5 rounded-xl p-2.5 flex justify-between items-center text-xs">
+                <div class="flex flex-col">
+                    <span class="text-[8px] uppercase font-bold text-brand-muted tracking-wider leading-none">Rounds</span>
+                    <span id="cyclesDetail" class="font-extrabold text-white mt-1">--</span>
+                </div>
+                <div class="h-6 w-[1px] bg-white/5"></div>
+                <div class="flex flex-col text-right">
+                    <span class="text-[8px] uppercase font-bold text-brand-muted tracking-wider leading-none">Timing Split</span>
+                    <span id="timeDetail" class="font-extrabold text-brand-accent mt-1">--</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Script references -->
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
