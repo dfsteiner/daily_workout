@@ -1,0 +1,33 @@
+/* Custom resets and enhancements for mobile viewports */
+body {
+    background-color: #121214;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Hide horizontal scrollbar indicators for custom week lists */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Transition improvements */
+.transition-all {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 200ms;
+}
+
+/* Neon glow for active work sets */
+.shadow-brand-accent\/30 {
+    box-shadow: 0 4px 14px 0 rgba(58, 134, 240, 0.3);
+}
+
+/* Custom button states */
+button:focus {
+    outline: none;
+}
